@@ -6,7 +6,7 @@ export const User = mongoose.model(
         vorname: String,
         nachname: String,
         email: String,
-        password: { type: String, select: false },
+        password: String,
         guthaben: Number,
         picurl: String,
         chargeid: String,

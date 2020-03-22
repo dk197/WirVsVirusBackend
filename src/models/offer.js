@@ -3,15 +3,19 @@ import mongoose from 'mongoose'
 export const Offer = mongoose.model(
     "Offer",
     {  
+       uid: String,
+       oid: String,
        offertype: String,
        jobtype: String,
-       date: Date,
+       date: String,
        title: String,
        description: String,
+       vorname: String,
+       nachame: String,
        cost: Number,
        tipp: Number,
-       shoppingList: Array,
-       long: String,
-       lat: String,
+       shoppingList: String,
+       long: Number,
+       lat: Number,
     }
 )

@@ -1,108 +1,34 @@
-import { User } from './models/user'
-import { Profiles } from './models/profiles'
-import jwt from  'jsonwebtoken'
-import bcrypt from 'bcryptjs'
-import uid from 'uid'
+//AUTH CONTROLLERS
+import loginController from './controllers/auth/login'
+import registerController from './controllers/auth/register'
 
-import context from './middleware/context'
+//PROFILE CONTROLLERS
+import getMyProfilesController from './controllers/profiles/getMyProfiles'
+import getMyUserProfileController from './controllers/profiles/getMyUserProfile'
+import createProfileController from './controllers/profiles/createProfile'
+import editProfileController from './controllers/profiles/editProfile'
+import deleteProfileController from './controllers/profiles/delteProfile'
 
-const secret_key = "0tymjDYWji"
+//OFFER CONTROLLERS
+import getMyOffersController from './controllers/offers/getMyOffers'
+import getOffersController from './controllers/offers/getOffers'
+import createOfferController from './controllers/offers/createOffer'
+ 
+
 
 export const resolvers = {
     Query: {
-        login: async (_,{ email, password }) => {
-
-            const user = await User.findOne({ email: email })
-            if (!user) {
-              throw new Error('User with email does not exist!')
-            } 
-            const isEqual = await bcrypt.compare(password, user.password)
-            if (!isEqual) {
-              throw new Error('Password is incorrect!')
-            }
-            const token = jwt.sign(
-              { userId: user.id, email: user.email },
-              secret_key,
-              {
-                expiresIn: '1h'
-              }
-            );
-            return { userId: user.id, token: token, tokenExpiration: 1 }
-          },
-        getMyProfiles: async (args, req, context) => {
-            if(!context.isAuth){
-                throw Error("You need to be authenticated to get your profiles")
-            }
-            const profilelist = Profiles.find({uid:context.userId})
-            
-            return profilelist
-           
-        }
+        login: loginController,
+        getMyProfiles: getMyProfilesController,
+        getMyUserProfile: getMyUserProfileController,
+        getMyOffers: getMyOffersController,
+        getOffers: getOffersController,
     },
     Mutation:{
-        register: async (_,{vorname,nachname,email,password}) =>{
-
-            const existingUser = await User.findOne({email:email})
-            if (existingUser){
-                throw new Error('User with your email does allready exist')
-            }
-
-            const hasedPassword = await bcrypt.hash(password, 12) 
-            const user = new User({
-                vorname,
-                nachname,
-                email,
-                password: hasedPassword,
-            })
-
-            const saveduser = await user.save()
-            const registereduser = await User.findOne({ email: email })
-
-            const token = jwt.sign(
-                { userId: registereduser.id, email: registereduser.email },
-                secret_key,
-                {
-                  expiresIn: '1h'
-                }
-              );
-              return { userId: registereduser.id, token: token, tokenExpiration: 1 }
-        },
-        createProfile: async (args, req, context,{vorname,nachname,strasse,hausnummer,adresszusatz,stadt,plz,land,long,lat}) => {
-
-            if(!context.isAuth){
-                throw Error("Please authenticate to add a profile!")
-            }
-
-            const puid = uid(16)
-
-            const profile = new Profiles({
-                uid: context.userId ,
-                pid: puid,
-                vorname:req.vorname,
-                nachname:req.nachname,
-                strasse:req.strasse,
-                hausnummer:req.hausnummer,
-                adresszusatz:req.adresszusatz,
-                stadt:req.stadt,
-                plz:req.plz,
-                land:req.land,
-                long:req.long,
-                lat:req.lat,
-            })
-
-            const saveprofile = await profile.save()
-            return saveprofile
-        },
-        deleteProfile:async(args, req, context) => {
-            if(!context.isAuth){
-                throw Error("Please authenticate to remove a profile!")
-            }
-        try{
-            await Profiles.deleteOne({uid:context.userId, pid: req.pid})
-        }catch(err){
-            throw err
-        }
-        return true
-        }        
+        register: registerController,
+        createProfile: createProfileController,
+        editProfile: editProfileController,
+        deleteProfile:deleteProfileController, 
+        createOffer:createOfferController      
     }
 }   
