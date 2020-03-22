@@ -12,7 +12,7 @@ const context = ({ req }) => {
 
     return {
       isAuth: true,
-      loggedInUser: decoded.userId
+      userId: decoded.userId
     };
 
   } catch (error) {
